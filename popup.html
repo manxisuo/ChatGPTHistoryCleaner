@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChatGPT History Cleaner</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <h1>ChatGPT 历史清理器</h1>
+    <div class="settings-section">
+      <label for="keepRounds">保留最近对话轮数：</label>
+      <div class="input-group">
+        <input type="number" id="keepRounds" min="1" max="100" value="10" />
+        <span class="input-hint">轮（1-100）</span>
+      </div>
+      <p class="description">清理历史对话轮次，只保留最近的 N 轮，提升页面性能</p>
+    </div>
+    <div class="button-group">
+      <button id="removeOldRounds" class="btn btn-primary">
+        🧹 清理历史对话
+      </button>
+      <button id="checkRounds" class="btn btn-info">
+        📊 查看当前对话数
+      </button>
+    </div>
+    <div id="status" class="status"></div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
+
