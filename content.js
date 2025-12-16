@@ -1,12 +1,16 @@
 // Content Script - 在 ChatGPT 页面中运行
 // 用于清理历史对话轮次，只保留最近的 N 轮
 
+// 获取翻译消息（使用 Chrome i18n API，会根据浏览器语言自动选择）
+function getMessage(key, substitutions = []) {
+  return chrome.i18n.getMessage(key, substitutions);
+}
+
 // 查找所有 article 元素（不管角色，都认为是有效的对话）
 function findArticleElements() {
   // 优先使用 #thread article 选择器（根据用户提供的路径信息）
   const thread = document.querySelector('#thread');
   if (!thread) {
-    console.warn('未找到 #thread 容器');
     return [];
   }
   
@@ -14,11 +18,9 @@ function findArticleElements() {
   const articles = Array.from(thread.querySelectorAll('article'));
   
   if (articles.length === 0) {
-    console.warn('未找到 article 元素');
     return [];
   }
   
-  console.log(`找到 ${articles.length} 个 article`);
   return articles;
 }
 
@@ -37,7 +39,7 @@ function removeOldRounds(keepRounds) {
     if (articles.length === 0) {
       return {
         success: false,
-        message: '未找到对话消息，请确保在 ChatGPT 对话页面'
+        message: getMessage('errorNotFound')
       };
     }
     
@@ -49,7 +51,7 @@ function removeOldRounds(keepRounds) {
       const currentRounds = Math.floor(totalArticles / 2);
       return {
         success: true,
-        message: `当前只有 ${currentRounds} 轮对话，无需清理`,
+        message: getMessage('infoNoNeedClean', [currentRounds.toString()]),
         rounds: currentRounds
       };
     }
@@ -66,18 +68,16 @@ function removeOldRounds(keepRounds) {
     const removedRounds = Math.floor(articlesToRemove / 2);
     const remainingRounds = Math.floor(articlesToKeep / 2);
     
-    console.log(`删除统计：总article数=${totalArticles}, 删除=${articlesToRemove}个, 保留=${articlesToKeep}个, 删除轮数=${removedRounds}, 保留轮数=${remainingRounds}`);
-    
     return {
       success: true,
-      message: `已清理 ${removedRounds} 轮历史对话，保留最近 ${remainingRounds} 轮`,
+      message: getMessage('successCleanedDetailed', [removedRounds.toString(), remainingRounds.toString()]),
       rounds: remainingRounds
     };
   } catch (error) {
     console.error('清理历史对话时出错:', error);
     return {
       success: false,
-      message: '清理失败：' + error.message
+      message: getMessage('errorCleanFailed') + error.message
     };
   }
 }
@@ -90,7 +90,7 @@ function checkRounds() {
     if (articles.length === 0) {
       return {
         success: false,
-        message: '未找到对话消息',
+        message: getMessage('errorNoMessages'),
         rounds: 0
       };
     }
@@ -100,14 +100,14 @@ function checkRounds() {
     
     return {
       success: true,
-      message: `当前共有 ${rounds} 轮对话（${articles.length} 个 article）`,
+      message: getMessage('infoCurrentRoundsDetailed', [rounds.toString(), articles.length.toString()]),
       rounds: rounds
     };
   } catch (error) {
     console.error('检查对话轮数时出错:', error);
     return {
       success: false,
-      message: '检查失败：' + error.message,
+      message: getMessage('errorCheckFailed') + error.message,
       rounds: 0
     };
   }
@@ -121,14 +121,21 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true;
   }
   
-  if (request.action === 'removeOldRounds') {
-    const result = removeOldRounds(request.keepRounds);
-    sendResponse(result);
-    return true;
-  } else if (request.action === 'checkRounds') {
-    const result = checkRounds();
-    sendResponse(result);
-    return true;
+  // 处理其他消息
+  try {
+    if (request.action === 'removeOldRounds') {
+      const result = removeOldRounds(request.keepRounds);
+      sendResponse(result);
+    } else if (request.action === 'checkRounds') {
+      const result = checkRounds();
+      sendResponse(result);
+    }
+  } catch (error) {
+    console.error('Error handling message:', error);
+    sendResponse({ 
+      success: false, 
+      message: getMessage('errorOccurred') + error.message 
+    });
   }
   
   return true; // 保持消息通道开放以支持异步响应
@@ -137,8 +144,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 // 页面加载完成后初始化
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
-    console.log('ChatGPT History Cleaner content script loaded');
+    // Content script loaded
   });
 } else {
-    console.log('ChatGPT History Cleaner content script loaded');
+  // Content script loaded
 }

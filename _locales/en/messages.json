@@ -1,0 +1,149 @@
+{
+  "extensionName": {
+    "message": "ChatGPT History Cleaner",
+    "description": "Extension name"
+  },
+  "extensionDescription": {
+    "message": "Clean ChatGPT conversation history, keep only the last N rounds to improve page performance",
+    "description": "Extension description"
+  },
+  "title": {
+    "message": "ChatGPT History Cleaner",
+    "description": "Popup title"
+  },
+  "keepRoundsLabel": {
+    "message": "Keep recent rounds:",
+    "description": "Label for keep rounds input"
+  },
+  "roundsUnit": {
+    "message": "rounds (1-100)",
+    "description": "Unit for rounds input"
+  },
+  "description": {
+    "message": "Clean conversation history, keep only the last N rounds to improve page performance",
+    "description": "Description text"
+  },
+  "cleanButton": {
+    "message": "🧹 Clean History",
+    "description": "Clean history button text"
+  },
+  "checkButton": {
+    "message": "📊 Check Current Rounds",
+    "description": "Check rounds button text"
+  },
+  "errorKeepRoundsRange": {
+    "message": "Keep rounds must be between 1-100",
+    "description": "Error message for invalid keep rounds range"
+  },
+  "errorNotChatGPT": {
+    "message": "Please use this feature on a ChatGPT page",
+    "description": "Error message when not on ChatGPT page"
+  },
+  "errorScriptLoad": {
+    "message": "Unable to load extension script, please refresh the page and try again",
+    "description": "Error message when script fails to load"
+  },
+  "errorOperationFailed": {
+    "message": "Operation failed: Please refresh the page and try again",
+    "description": "Error message for failed operation"
+  },
+  "successCleaned": {
+    "message": "Cleaned history, kept the last $ROUNDS$ rounds",
+    "description": "Success message after cleaning",
+    "placeholders": {
+      "ROUNDS": {
+        "content": "$1",
+        "example": "10"
+      }
+    }
+  },
+  "errorOperationFailedRetry": {
+    "message": "Operation failed, please refresh the page and try again",
+    "description": "Error message for failed operation with retry"
+  },
+  "errorOccurred": {
+    "message": "An error occurred: ",
+    "description": "Error prefix message"
+  },
+  "infoCurrentRounds": {
+    "message": "Current conversation has $ROUNDS$ rounds",
+    "description": "Info message showing current rounds",
+    "placeholders": {
+      "ROUNDS": {
+        "content": "$1",
+        "example": "10"
+      }
+    }
+  },
+  "errorCannotGetRounds": {
+    "message": "Unable to get conversation count",
+    "description": "Error message when cannot get rounds"
+  },
+  "errorNotFound": {
+    "message": "No conversation messages found, please ensure you are on a ChatGPT conversation page",
+    "description": "Error message when no messages found"
+  },
+  "infoNoNeedClean": {
+    "message": "Current conversation has only $ROUNDS$ rounds, no need to clean",
+    "description": "Info message when no need to clean",
+    "placeholders": {
+      "ROUNDS": {
+        "content": "$1",
+        "example": "10"
+      }
+    }
+  },
+  "successCleanedDetailed": {
+    "message": "Cleaned $REMOVED$ rounds of history, kept the last $KEPT$ rounds",
+    "description": "Success message with detailed cleaning info",
+    "placeholders": {
+      "REMOVED": {
+        "content": "$1",
+        "example": "5"
+      },
+      "KEPT": {
+        "content": "$2",
+        "example": "10"
+      }
+    }
+  },
+  "errorCleanFailed": {
+    "message": "Clean failed: ",
+    "description": "Error message prefix for clean failure"
+  },
+  "errorNoMessages": {
+    "message": "No conversation messages found",
+    "description": "Error message when no messages found"
+  },
+  "infoCurrentRoundsDetailed": {
+    "message": "Current conversation has $ROUNDS$ rounds ($ARTICLES$ articles)",
+    "description": "Info message with detailed rounds info",
+    "placeholders": {
+      "ROUNDS": {
+        "content": "$1",
+        "example": "10"
+      },
+      "ARTICLES": {
+        "content": "$2",
+        "example": "20"
+      }
+    }
+  },
+  "errorCheckFailed": {
+    "message": "Check failed: ",
+    "description": "Error message prefix for check failure"
+  },
+  "installed": {
+    "message": "ChatGPT History Cleaner installed",
+    "description": "Message when extension is installed"
+  },
+  "updated": {
+    "message": "ChatGPT History Cleaner updated",
+    "description": "Message when extension is updated"
+  },
+  "detectedChatGPT": {
+    "message": "ChatGPT page detected",
+    "description": "Message when ChatGPT page is detected"
+  }
+}
+

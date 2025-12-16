@@ -1,0 +1,149 @@
+{
+  "extensionName": {
+    "message": "ChatGPT 历史清理器",
+    "description": "扩展名称"
+  },
+  "extensionDescription": {
+    "message": "清理 ChatGPT 历史对话轮次，只保留最近 N 轮，提升页面性能",
+    "description": "扩展描述"
+  },
+  "title": {
+    "message": "ChatGPT 历史清理器",
+    "description": "弹窗标题"
+  },
+  "keepRoundsLabel": {
+    "message": "保留最近对话轮数：",
+    "description": "保留轮数输入框标签"
+  },
+  "roundsUnit": {
+    "message": "轮（1-100）",
+    "description": "轮数单位"
+  },
+  "description": {
+    "message": "清理历史对话轮次，只保留最近 N 轮，提升页面性能",
+    "description": "描述文本"
+  },
+  "cleanButton": {
+    "message": "🧹 清理历史对话",
+    "description": "清理历史按钮文本"
+  },
+  "checkButton": {
+    "message": "📊 查看当前对话数",
+    "description": "查看对话数按钮文本"
+  },
+  "errorKeepRoundsRange": {
+    "message": "保留轮数必须在 1-100 之间",
+    "description": "保留轮数范围错误消息"
+  },
+  "errorNotChatGPT": {
+    "message": "请在 ChatGPT 页面使用此功能",
+    "description": "不在 ChatGPT 页面时的错误消息"
+  },
+  "errorScriptLoad": {
+    "message": "无法加载扩展脚本，请刷新页面后重试",
+    "description": "脚本加载失败时的错误消息"
+  },
+  "errorOperationFailed": {
+    "message": "操作失败：请刷新页面后重试",
+    "description": "操作失败的错误消息"
+  },
+  "successCleaned": {
+    "message": "已清理历史对话，保留最近 $ROUNDS$ 轮",
+    "description": "清理成功后的消息",
+    "placeholders": {
+      "ROUNDS": {
+        "content": "$1",
+        "example": "10"
+      }
+    }
+  },
+  "errorOperationFailedRetry": {
+    "message": "操作失败，请刷新页面后重试",
+    "description": "操作失败需要重试的错误消息"
+  },
+  "errorOccurred": {
+    "message": "发生错误：",
+    "description": "错误前缀消息"
+  },
+  "infoCurrentRounds": {
+    "message": "当前共有 $ROUNDS$ 轮对话",
+    "description": "显示当前轮数的信息消息",
+    "placeholders": {
+      "ROUNDS": {
+        "content": "$1",
+        "example": "10"
+      }
+    }
+  },
+  "errorCannotGetRounds": {
+    "message": "无法获取对话数",
+    "description": "无法获取轮数时的错误消息"
+  },
+  "errorNotFound": {
+    "message": "未找到对话消息，请确保在 ChatGPT 对话页面",
+    "description": "未找到消息时的错误消息"
+  },
+  "infoNoNeedClean": {
+    "message": "当前只有 $ROUNDS$ 轮对话，无需清理",
+    "description": "无需清理时的信息消息",
+    "placeholders": {
+      "ROUNDS": {
+        "content": "$1",
+        "example": "10"
+      }
+    }
+  },
+  "successCleanedDetailed": {
+    "message": "已清理 $REMOVED$ 轮历史对话，保留最近 $KEPT$ 轮",
+    "description": "清理成功的详细消息",
+    "placeholders": {
+      "REMOVED": {
+        "content": "$1",
+        "example": "5"
+      },
+      "KEPT": {
+        "content": "$2",
+        "example": "10"
+      }
+    }
+  },
+  "errorCleanFailed": {
+    "message": "清理失败：",
+    "description": "清理失败的错误前缀"
+  },
+  "errorNoMessages": {
+    "message": "未找到对话消息",
+    "description": "未找到消息时的错误消息"
+  },
+  "infoCurrentRoundsDetailed": {
+    "message": "当前共有 $ROUNDS$ 轮对话（$ARTICLES$ 个 article）",
+    "description": "显示详细轮数信息",
+    "placeholders": {
+      "ROUNDS": {
+        "content": "$1",
+        "example": "10"
+      },
+      "ARTICLES": {
+        "content": "$2",
+        "example": "20"
+      }
+    }
+  },
+  "errorCheckFailed": {
+    "message": "检查失败：",
+    "description": "检查失败的错误前缀"
+  },
+  "installed": {
+    "message": "ChatGPT History Cleaner 已安装",
+    "description": "扩展安装时的消息"
+  },
+  "updated": {
+    "message": "ChatGPT History Cleaner 已更新",
+    "description": "扩展更新时的消息"
+  },
+  "detectedChatGPT": {
+    "message": "检测到 ChatGPT 页面",
+    "description": "检测到 ChatGPT 页面时的消息"
+  }
+}
+

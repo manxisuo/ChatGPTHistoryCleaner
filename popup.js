@@ -1,3 +1,30 @@
+// 获取翻译消息（使用 Chrome i18n API，会根据浏览器语言自动选择）
+function getMessage(key, substitutions = []) {
+  return chrome.i18n.getMessage(key, substitutions);
+}
+
+// 初始化 i18n
+function initI18n() {
+  // 更新界面文本
+  const elements = document.querySelectorAll('[data-i18n]');
+  elements.forEach(element => {
+    const key = element.getAttribute('data-i18n');
+    const message = getMessage(key);
+    if (message) {
+      if (element.tagName === 'INPUT' && element.type === 'button') {
+        element.value = message;
+      } else {
+        element.textContent = message;
+      }
+    }
+  });
+  // 更新 title
+  document.title = getMessage('title');
+}
+
+// 页面加载时初始化 i18n
+initI18n();
+
 // 显示状态消息
 function showStatus(message, type = 'info') {
   const statusEl = document.getElementById('status');
@@ -26,7 +53,7 @@ async function loadSettings() {
 async function saveSettings() {
   const keepRounds = parseInt(document.getElementById('keepRounds').value);
   if (keepRounds < 1 || keepRounds > 100) {
-    showStatus('保留轮数必须在 1-100 之间', 'error');
+    showStatus(getMessage('errorKeepRoundsRange'), 'error');
     return false;
   }
   await chrome.storage.local.set({ keepRounds });
@@ -71,14 +98,14 @@ document.getElementById('removeOldRounds').addEventListener('click', async () =>
     
     // 检查是否在 ChatGPT 页面
     if (!tab.url.includes('chat.openai.com') && !tab.url.includes('chatgpt.com')) {
-      showStatus('请在 ChatGPT 页面使用此功能', 'error');
+      showStatus(getMessage('errorNotChatGPT'), 'error');
       return;
     }
 
     // 确保 content script 已注入
     const scriptReady = await ensureContentScript(tab.id);
     if (!scriptReady) {
-      showStatus('无法加载扩展脚本，请刷新页面后重试', 'error');
+      showStatus(getMessage('errorScriptLoad'), 'error');
       return;
     }
 
@@ -92,19 +119,25 @@ document.getElementById('removeOldRounds').addEventListener('click', async () =>
     // 向 content script 发送消息
     chrome.tabs.sendMessage(tab.id, { 
       action: 'removeOldRounds', 
-      keepRounds 
+      keepRounds
     }, (response) => {
       if (chrome.runtime.lastError) {
-        showStatus('操作失败：请刷新页面后重试', 'error');
+        showStatus(getMessage('errorOperationFailed'), 'error');
         console.error('发送消息失败:', chrome.runtime.lastError);
-      } else if (response && response.success) {
-        showStatus(response.message || `已清理历史对话，保留最近 ${keepRounds} 轮`, 'success');
+        return;
+      }
+      if (response) {
+        if (response.success) {
+          showStatus(response.message || getMessage('successCleaned', [keepRounds.toString()]), 'success');
+        } else {
+          showStatus(response.message || getMessage('errorOperationFailedRetry'), 'error');
+        }
       } else {
-        showStatus(response?.message || '操作失败，请刷新页面后重试', 'error');
+        showStatus(getMessage('errorOperationFailedRetry'), 'error');
       }
     });
   } catch (error) {
-    showStatus('发生错误：' + error.message, 'error');
+    showStatus(getMessage('errorOccurred') + error.message, 'error');
     console.error('清理历史对话错误:', error);
   }
 });
@@ -115,29 +148,37 @@ document.getElementById('checkRounds').addEventListener('click', async () => {
     const tab = await getCurrentTab();
     
     if (!tab.url.includes('chat.openai.com') && !tab.url.includes('chatgpt.com')) {
-      showStatus('请在 ChatGPT 页面使用此功能', 'error');
+      showStatus(getMessage('errorNotChatGPT'), 'error');
       return;
     }
 
     // 确保 content script 已注入
     const scriptReady = await ensureContentScript(tab.id);
     if (!scriptReady) {
-      showStatus('无法加载扩展脚本，请刷新页面后重试', 'error');
+      showStatus(getMessage('errorScriptLoad'), 'error');
       return;
     }
 
-    chrome.tabs.sendMessage(tab.id, { action: 'checkRounds' }, (response) => {
+    chrome.tabs.sendMessage(tab.id, { 
+      action: 'checkRounds'
+    }, (response) => {
       if (chrome.runtime.lastError) {
-        showStatus('操作失败：请刷新页面后重试', 'error');
+        showStatus(getMessage('errorOperationFailed'), 'error');
         console.error('发送消息失败:', chrome.runtime.lastError);
-      } else if (response && response.success) {
-        showStatus(`当前共有 ${response.rounds} 轮对话`, 'info');
+        return;
+      }
+      if (response) {
+        if (response.success) {
+          showStatus(getMessage('infoCurrentRounds', [response.rounds.toString()]), 'info');
+        } else {
+          showStatus(response.message || getMessage('errorCannotGetRounds'), 'error');
+        }
       } else {
-        showStatus(response?.message || '无法获取对话数', 'error');
+        showStatus(getMessage('errorCannotGetRounds'), 'error');
       }
     });
   } catch (error) {
-    showStatus('发生错误：' + error.message, 'error');
+    showStatus(getMessage('errorOccurred') + error.message, 'error');
     console.error('查看对话数错误:', error);
   }
 });

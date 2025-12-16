@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "ChatGPT History Cleaner",
+  "name": "__MSG_extensionName__",
   "version": "1.0.0",
-  "description": "清理 ChatGPT 历史对话轮次，只保留最近的 N 轮，提升页面性能",
+  "description": "__MSG_extensionDescription__",
+  "default_locale": "zh_CN",
   "permissions": [
     "activeTab",
     "storage",
