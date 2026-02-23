@@ -144,6 +144,28 @@
   "detectedChatGPT": {
     "message": "ChatGPT page detected",
     "description": "Message when ChatGPT page is detected"
+  },
+  "autoMaintainLabel": {
+    "message": "Auto-maintain",
+    "description": "Label for auto-maintain checkbox"
+  },
+  "autoMaintainDesc": {
+    "message": "Automatically remove the oldest round when a new one is added",
+    "description": "Description for auto-maintain feature"
+  },
+  "autoMaintainEnabled": {
+    "message": "Auto-maintain enabled (keeping $ROUNDS$ rounds)",
+    "description": "Status message when auto-maintain is enabled",
+    "placeholders": {
+      "ROUNDS": {
+        "content": "$1",
+        "example": "10"
+      }
+    }
+  },
+  "autoMaintainDisabled": {
+    "message": "Auto-maintain disabled",
+    "description": "Status message when auto-maintain is disabled"
   }
 }
 

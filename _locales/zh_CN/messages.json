@@ -144,6 +144,28 @@
   "detectedChatGPT": {
     "message": "检测到 ChatGPT 页面",
     "description": "检测到 ChatGPT 页面时的消息"
+  },
+  "autoMaintainLabel": {
+    "message": "自动保持",
+    "description": "自动保持复选框标签"
+  },
+  "autoMaintainDesc": {
+    "message": "产生新对话时，自动删除最旧的一轮",
+    "description": "自动保持功能描述"
+  },
+  "autoMaintainEnabled": {
+    "message": "已开启自动保持（保留 $ROUNDS$ 轮）",
+    "description": "自动保持开启时的状态消息",
+    "placeholders": {
+      "ROUNDS": {
+        "content": "$1",
+        "example": "10"
+      }
+    }
+  },
+  "autoMaintainDisabled": {
+    "message": "已关闭自动保持",
+    "description": "自动保持关闭时的状态消息"
   }
 }
 

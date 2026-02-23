@@ -15,7 +15,12 @@
         <input type="number" id="keepRounds" min="1" max="100" value="10" />
         <span class="input-hint" data-i18n="roundsUnit">轮（1-100）</span>
       </div>
-      <p class="description" data-i18n="description">清理历史对话轮次，只保留最近的 N 轮，提升页面性能</p>
+      <div class="checkbox-group">
+        <label class="checkbox-label">
+          <input type="checkbox" id="autoMaintain" />
+          <span class="checkbox-text" data-i18n="autoMaintainLabel">自动保持轮数上限</span>
+        </label>
+      </div>
     </div>
     <div class="button-group">
       <button id="removeOldRounds" class="btn btn-primary" data-i18n="cleanButton">

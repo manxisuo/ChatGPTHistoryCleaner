@@ -44,9 +44,9 @@ async function getCurrentTab() {
 
 // 加载保存的设置
 async function loadSettings() {
-  const result = await chrome.storage.local.get({ keepRounds: 10 });
-  const keepRoundsInput = document.getElementById('keepRounds');
-  keepRoundsInput.value = result.keepRounds;
+  const result = await chrome.storage.local.get({ keepRounds: 10, autoMaintain: false });
+  document.getElementById('keepRounds').value = result.keepRounds;
+  document.getElementById('autoMaintain').checked = result.autoMaintain;
 }
 
 // 保存设置
@@ -56,38 +56,67 @@ async function saveSettings() {
     showStatus(getMessage('errorKeepRoundsRange'), 'error');
     return false;
   }
-  await chrome.storage.local.set({ keepRounds });
+  const autoMaintain = document.getElementById('autoMaintain').checked;
+  await chrome.storage.local.set({ keepRounds, autoMaintain });
   return true;
+}
+
+// 通知所有 ChatGPT 标签页更新自动保持设置
+async function notifyAutoMaintainChange() {
+  const keepRounds = parseInt(document.getElementById('keepRounds').value);
+  const autoMaintain = document.getElementById('autoMaintain').checked;
+  const tabs = await chrome.tabs.query({
+    url: ['https://chat.openai.com/*', 'https://chatgpt.com/*']
+  });
+  for (const tab of tabs) {
+    try {
+      chrome.tabs.sendMessage(tab.id, {
+        action: 'setAutoMaintain',
+        autoMaintain,
+        keepRounds
+      });
+    } catch (e) {
+      // tab 可能没有 content script
+    }
+  }
 }
 
 // 页面加载时恢复设置
 loadSettings();
 
-// 保存设置按钮（当输入框改变时自动保存）
+// 输入框改变时保存并通知
 document.getElementById('keepRounds').addEventListener('change', async () => {
-  await saveSettings();
+  if (await saveSettings()) {
+    const autoMaintain = document.getElementById('autoMaintain').checked;
+    if (autoMaintain) {
+      await notifyAutoMaintainChange();
+    }
+  }
 });
 
-// 确保 content script 已注入
-async function ensureContentScript(tabId) {
+// 复选框改变时保存并通知
+document.getElementById('autoMaintain').addEventListener('change', async () => {
+  if (await saveSettings()) {
+    const autoMaintain = document.getElementById('autoMaintain').checked;
+    await notifyAutoMaintainChange();
+    if (autoMaintain) {
+      const keepRounds = parseInt(document.getElementById('keepRounds').value);
+      showStatus(getMessage('autoMaintainEnabled', [keepRounds.toString()]), 'success');
+    } else {
+      showStatus(getMessage('autoMaintainDisabled'), 'info');
+    }
+  }
+});
+
+// 检查 content script 是否已加载
+async function checkContentScript(tabId) {
   try {
     // 尝试发送一个测试消息
     await chrome.tabs.sendMessage(tabId, { action: 'ping' });
     return true;
   } catch (error) {
-    // 如果失败，尝试注入 content script
-    try {
-      await chrome.scripting.executeScript({
-        target: { tabId: tabId },
-        files: ['content.js']
-      });
-      // 等待一小段时间让脚本加载
-      await new Promise(resolve => setTimeout(resolve, 100));
-      return true;
-    } catch (injectError) {
-      console.error('无法注入 content script:', injectError);
-      return false;
-    }
+    // Content script 未加载，需要用户刷新页面
+    return false;
   }
 }
 
@@ -102,10 +131,10 @@ document.getElementById('removeOldRounds').addEventListener('click', async () =>
       return;
     }
 
-    // 确保 content script 已注入
-    const scriptReady = await ensureContentScript(tab.id);
+    // 检查 content script 是否已加载
+    const scriptReady = await checkContentScript(tab.id);
     if (!scriptReady) {
-      showStatus(getMessage('errorScriptLoad'), 'error');
+      showStatus(getMessage('errorScriptLoad') + ' Please refresh the ChatGPT page and try again.', 'error');
       return;
     }
 
@@ -152,10 +181,10 @@ document.getElementById('checkRounds').addEventListener('click', async () => {
       return;
     }
 
-    // 确保 content script 已注入
-    const scriptReady = await ensureContentScript(tab.id);
+    // 检查 content script 是否已加载
+    const scriptReady = await checkContentScript(tab.id);
     if (!scriptReady) {
-      showStatus(getMessage('errorScriptLoad'), 'error');
+      showStatus(getMessage('errorScriptLoad') + ' Please refresh the ChatGPT page and try again.', 'error');
       return;
     }
 

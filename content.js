@@ -113,6 +113,101 @@ function checkRounds() {
   }
 }
 
+// ========== 自动保持轮数功能 ==========
+
+let autoMaintainEnabled = false;
+let autoMaintainKeepRounds = 10;
+let observer = null;
+// 防抖：避免短时间内多次触发清理
+let cleanupTimer = null;
+
+function scheduleAutoCleanup() {
+  if (cleanupTimer) clearTimeout(cleanupTimer);
+  cleanupTimer = setTimeout(() => {
+    if (!autoMaintainEnabled) return;
+    const articles = findArticleElements();
+    const articlesToKeep = autoMaintainKeepRounds * 2;
+    if (articles.length > articlesToKeep) {
+      const articlesToDelete = articles.slice(0, articles.length - articlesToKeep);
+      articlesToDelete.forEach(article => {
+        if (article.parentNode) article.remove();
+      });
+    }
+  }, 500);
+}
+
+function startObserver() {
+  if (observer) return;
+
+  const thread = document.querySelector('#thread');
+  if (!thread) return;
+
+  observer = new MutationObserver((mutations) => {
+    if (!autoMaintainEnabled) return;
+    // 检查是否有新的 article 被添加
+    for (const mutation of mutations) {
+      for (const node of mutation.addedNodes) {
+        if (node.nodeType === Node.ELEMENT_NODE) {
+          if (node.tagName === 'ARTICLE' || node.querySelector?.('article')) {
+            scheduleAutoCleanup();
+            return;
+          }
+        }
+      }
+    }
+  });
+
+  observer.observe(thread, { childList: true, subtree: true });
+}
+
+function stopObserver() {
+  if (observer) {
+    observer.disconnect();
+    observer = null;
+  }
+  if (cleanupTimer) {
+    clearTimeout(cleanupTimer);
+    cleanupTimer = null;
+  }
+}
+
+function updateAutoMaintain(enabled, keepRounds) {
+  autoMaintainEnabled = enabled;
+  autoMaintainKeepRounds = keepRounds;
+
+  if (enabled) {
+    startObserver();
+    scheduleAutoCleanup();
+  } else {
+    stopObserver();
+  }
+}
+
+// 页面加载时从存储中恢复自动保持设置
+async function initAutoMaintain() {
+  try {
+    const result = await chrome.storage.local.get({ autoMaintain: false, keepRounds: 10 });
+    updateAutoMaintain(result.autoMaintain, result.keepRounds);
+  } catch (e) {
+    // storage 访问失败时忽略
+  }
+}
+
+// 监听存储变化（当用户在 popup 中改设置，但 popup 关闭后再打开新 tab 时也能同步）
+chrome.storage.onChanged.addListener((changes) => {
+  if (changes.autoMaintain || changes.keepRounds) {
+    const enabled = changes.autoMaintain
+      ? changes.autoMaintain.newValue
+      : autoMaintainEnabled;
+    const rounds = changes.keepRounds
+      ? changes.keepRounds.newValue
+      : autoMaintainKeepRounds;
+    updateAutoMaintain(enabled, rounds);
+  }
+});
+
+// ========== 消息监听 ==========
+
 // 监听来自 popup 的消息
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   // 处理 ping 消息（用于检查 content script 是否已加载）
@@ -121,6 +216,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true;
   }
   
+  // 处理自动保持设置
+  if (request.action === 'setAutoMaintain') {
+    updateAutoMaintain(request.autoMaintain, request.keepRounds);
+    sendResponse({ success: true });
+    return true;
+  }
+
   // 处理其他消息
   try {
     if (request.action === 'removeOldRounds') {
@@ -138,14 +240,30 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     });
   }
   
-  return true; // 保持消息通道开放以支持异步响应
+  return true;
 });
 
-// 页面加载完成后初始化
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
-    // Content script loaded
+// ========== 初始化 ==========
+
+// #thread 可能在 content script 加载后才出现，需要等待
+function waitForThreadAndInit() {
+  const thread = document.querySelector('#thread');
+  if (thread) {
+    initAutoMaintain();
+    return;
+  }
+  // 用 MutationObserver 等待 #thread 出现
+  const bodyObserver = new MutationObserver(() => {
+    if (document.querySelector('#thread')) {
+      bodyObserver.disconnect();
+      initAutoMaintain();
+    }
   });
+  bodyObserver.observe(document.body, { childList: true, subtree: true });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', waitForThreadAndInit);
 } else {
-  // Content script loaded
+  waitForThreadAndInit();
 }

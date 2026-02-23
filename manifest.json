@@ -6,12 +6,7 @@
   "default_locale": "zh_CN",
   "permissions": [
     "activeTab",
-    "storage",
-    "scripting"
-  ],
-  "host_permissions": [
-    "https://chat.openai.com/*",
-    "https://chatgpt.com/*"
+    "storage"
   ],
   "action": {
     "default_popup": "popup.html",
