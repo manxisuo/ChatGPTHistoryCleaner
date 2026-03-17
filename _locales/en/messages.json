@@ -4,7 +4,7 @@
     "description": "Extension name"
   },
   "extensionDescription": {
-    "message": "Clean ChatGPT conversation history, keep only the last N rounds to improve page performance",
+    "message": "Limit visible ChatGPT conversation turns to the most recent N messages, improving page performance without affecting conversation data or context.",
     "description": "Extension description"
   },
   "title": {

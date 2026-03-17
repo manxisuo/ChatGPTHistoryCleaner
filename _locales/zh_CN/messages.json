@@ -4,7 +4,7 @@
     "description": "扩展名称"
   },
   "extensionDescription": {
-    "message": "清理 ChatGPT 历史对话轮次，只保留最近 N 轮，提升页面性能",
+    "message": "限制 ChatGPT 页面中可见的对话轮次，仅保留最近 N 条消息，在不影响对话数据和上下文的前提下提升页面性能。",
     "description": "扩展描述"
   },
   "title": {

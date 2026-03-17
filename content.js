@@ -138,17 +138,21 @@ function scheduleAutoCleanup() {
 
 function startObserver() {
   if (observer) return;
-
-  const thread = document.querySelector('#thread');
-  if (!thread) return;
+  const target = document.documentElement || document.body;
+  if (!target) return;
 
   observer = new MutationObserver((mutations) => {
     if (!autoMaintainEnabled) return;
-    // 检查是否有新的 article 被添加
+    // 监听全局新增节点，兼容会话切换/新建会话导致的容器替换
     for (const mutation of mutations) {
       for (const node of mutation.addedNodes) {
         if (node.nodeType === Node.ELEMENT_NODE) {
-          if (node.tagName === 'ARTICLE' || node.querySelector?.('article')) {
+          if (
+            node.id === 'thread' ||
+            node.tagName === 'ARTICLE' ||
+            node.querySelector?.('#thread') ||
+            node.querySelector?.('article')
+          ) {
             scheduleAutoCleanup();
             return;
           }
@@ -157,7 +161,7 @@ function startObserver() {
     }
   });
 
-  observer.observe(thread, { childList: true, subtree: true });
+  observer.observe(target, { childList: true, subtree: true });
 }
 
 function stopObserver() {
