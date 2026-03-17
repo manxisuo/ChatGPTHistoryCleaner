@@ -4,7 +4,7 @@
     "description": "Extension name"
   },
   "extensionDescription": {
-    "message": "Limit visible ChatGPT conversation turns to the most recent N messages, improving page performance without affecting conversation data or context.",
+    "message": "Limit visible ChatGPT messages to the most recent N to improve performance without affecting data or context.",
     "description": "Extension description"
   },
   "title": {
