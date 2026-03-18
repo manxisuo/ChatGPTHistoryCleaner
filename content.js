@@ -6,68 +6,67 @@ function getMessage(key, substitutions = []) {
   return chrome.i18n.getMessage(key, substitutions);
 }
 
-// 查找所有 article 元素（不管角色，都认为是有效的对话）
-function findArticleElements() {
-  // 优先使用 #thread article 选择器（根据用户提供的路径信息）
+// 查找所有对话节点（兼容旧版 article 和新版 section turn）
+function findTurnElements() {
   const thread = document.querySelector('#thread');
   if (!thread) {
     return [];
   }
-  
-  // 查找 thread 下的所有 article 元素
-  const articles = Array.from(thread.querySelectorAll('article'));
-  
-  if (articles.length === 0) {
-    return [];
+
+  // 新版 ChatGPT 结构：section[data-testid^="conversation-turn-"]
+  const turnSections = Array.from(
+    thread.querySelectorAll('section[data-testid^="conversation-turn-"][data-turn-id]')
+  );
+  if (turnSections.length > 0) {
+    return turnSections;
   }
-  
-  return articles;
+
+  // 旧版结构回退：article
+  return Array.from(thread.querySelectorAll('article'));
 }
 
-// 计算对话轮数（每2个article = 1轮）
-function calculateRounds(articles) {
-  return Math.floor(articles.length / 2);
+// 计算对话轮数（每2个节点 = 1轮）
+function calculateRounds(turnElements) {
+  return Math.floor(turnElements.length / 2);
 }
 
 // 清理历史对话轮次
 // 简单方案：保留最后 2N 个 article，删除前面所有的
 function removeOldRounds(keepRounds) {
   try {
-    // 查找所有 article 元素
-    const articles = findArticleElements();
-    
-    if (articles.length === 0) {
+    const turnElements = findTurnElements();
+
+    if (turnElements.length === 0) {
       return {
         success: false,
         message: getMessage('errorNotFound')
       };
     }
-    
-    const totalArticles = articles.length;
-    const articlesToKeep = keepRounds * 2; // 保留 N 轮 = 保留最后 2N 个 article
-    const articlesToRemove = totalArticles - articlesToKeep;
-    
-    if (articlesToRemove <= 0) {
-      const currentRounds = Math.floor(totalArticles / 2);
+
+    const totalTurns = turnElements.length;
+    const turnsToKeep = keepRounds * 2;
+    const turnsToRemove = totalTurns - turnsToKeep;
+
+    if (turnsToRemove <= 0) {
+      const currentRounds = Math.floor(totalTurns / 2);
       return {
         success: true,
         message: getMessage('infoNoNeedClean', [currentRounds.toString()]),
         rounds: currentRounds
       };
     }
-    
-    // 删除前面的 article（保留后面的）
-    // 使用数组副本，避免删除时影响索引
-    const articlesToDelete = articles.slice(0, articlesToRemove);
-    articlesToDelete.forEach(article => {
-      if (article.parentNode) {
-        article.remove();
+
+    // 删除最旧的节点（保留最新）
+    const turnElementsToDelete = turnElements.slice(0, turnsToRemove);
+    turnElementsToDelete.forEach(turnEl => {
+      if (turnEl.parentNode) {
+        turnEl.remove();
       }
     });
-    
-    const removedRounds = Math.floor(articlesToRemove / 2);
-    const remainingRounds = Math.floor(articlesToKeep / 2);
-    
+
+    const removedRounds = Math.floor(turnsToRemove / 2);
+    const remainingRounds = Math.floor(turnsToKeep / 2);
+
     return {
       success: true,
       message: getMessage('successCleanedDetailed', [removedRounds.toString(), remainingRounds.toString()]),
@@ -85,22 +84,21 @@ function removeOldRounds(keepRounds) {
 // 检查当前对话轮数
 function checkRounds() {
   try {
-    const articles = findArticleElements();
-    
-    if (articles.length === 0) {
+    const turnElements = findTurnElements();
+
+    if (turnElements.length === 0) {
       return {
         success: false,
         message: getMessage('errorNoMessages'),
         rounds: 0
       };
     }
-    
-    // 每2个article = 1轮对话
-    const rounds = Math.floor(articles.length / 2);
-    
+
+    const rounds = Math.floor(turnElements.length / 2);
+
     return {
       success: true,
-      message: getMessage('infoCurrentRoundsDetailed', [rounds.toString(), articles.length.toString()]),
+      message: getMessage('infoCurrentRoundsDetailed', [rounds.toString(), turnElements.length.toString()]),
       rounds: rounds
     };
   } catch (error) {
@@ -125,12 +123,12 @@ function scheduleAutoCleanup() {
   if (cleanupTimer) clearTimeout(cleanupTimer);
   cleanupTimer = setTimeout(() => {
     if (!autoMaintainEnabled) return;
-    const articles = findArticleElements();
-    const articlesToKeep = autoMaintainKeepRounds * 2;
-    if (articles.length > articlesToKeep) {
-      const articlesToDelete = articles.slice(0, articles.length - articlesToKeep);
-      articlesToDelete.forEach(article => {
-        if (article.parentNode) article.remove();
+    const turnElements = findTurnElements();
+    const turnsToKeep = autoMaintainKeepRounds * 2;
+    if (turnElements.length > turnsToKeep) {
+      const turnElementsToDelete = turnElements.slice(0, turnElements.length - turnsToKeep);
+      turnElementsToDelete.forEach(turnEl => {
+        if (turnEl.parentNode) turnEl.remove();
       });
     }
   }, 500);
@@ -147,11 +145,15 @@ function startObserver() {
     for (const mutation of mutations) {
       for (const node of mutation.addedNodes) {
         if (node.nodeType === Node.ELEMENT_NODE) {
+          const isTurnSection =
+            node.matches?.('section[data-testid^="conversation-turn-"][data-turn-id]') ||
+            node.querySelector?.('section[data-testid^="conversation-turn-"][data-turn-id]');
           if (
             node.id === 'thread' ||
             node.tagName === 'ARTICLE' ||
             node.querySelector?.('#thread') ||
-            node.querySelector?.('article')
+            node.querySelector?.('article') ||
+            isTurnSection
           ) {
             scheduleAutoCleanup();
             return;
