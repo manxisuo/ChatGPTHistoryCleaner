@@ -19,17 +19,9 @@
     "message": "rounds",
     "description": "Unit for rounds input"
   },
-  "description": {
-    "message": "Clean conversation history, keep only the last N rounds to improve page performance",
-    "description": "Description text"
-  },
   "cleanButton": {
     "message": "🧹 Clean History",
     "description": "Clean history button text"
-  },
-  "checkButton": {
-    "message": "📊 Check Current Rounds",
-    "description": "Check rounds button text"
   },
   "errorKeepRoundsRange": {
     "message": "Keep rounds must be between 1-100",
@@ -65,20 +57,6 @@
     "message": "An error occurred: ",
     "description": "Error prefix message"
   },
-  "infoCurrentRounds": {
-    "message": "Current conversation has $ROUNDS$ rounds",
-    "description": "Info message showing current rounds",
-    "placeholders": {
-      "ROUNDS": {
-        "content": "$1",
-        "example": "10"
-      }
-    }
-  },
-  "errorCannotGetRounds": {
-    "message": "Unable to get conversation count",
-    "description": "Error message when cannot get rounds"
-  },
   "errorNotFound": {
     "message": "No conversation messages found, please ensure you are on a ChatGPT conversation page",
     "description": "Error message when no messages found"
@@ -111,47 +89,9 @@
     "message": "Clean failed: ",
     "description": "Error message prefix for clean failure"
   },
-  "errorNoMessages": {
-    "message": "No conversation messages found",
-    "description": "Error message when no messages found"
-  },
-  "infoCurrentRoundsDetailed": {
-    "message": "Current conversation has $ROUNDS$ rounds ($ARTICLES$ articles)",
-    "description": "Info message with detailed rounds info",
-    "placeholders": {
-      "ROUNDS": {
-        "content": "$1",
-        "example": "10"
-      },
-      "ARTICLES": {
-        "content": "$2",
-        "example": "20"
-      }
-    }
-  },
-  "errorCheckFailed": {
-    "message": "Check failed: ",
-    "description": "Error message prefix for check failure"
-  },
-  "installed": {
-    "message": "ChatGPT History Cleaner installed",
-    "description": "Message when extension is installed"
-  },
-  "updated": {
-    "message": "ChatGPT History Cleaner updated",
-    "description": "Message when extension is updated"
-  },
-  "detectedChatGPT": {
-    "message": "ChatGPT page detected",
-    "description": "Message when ChatGPT page is detected"
-  },
   "autoMaintainLabel": {
     "message": "Auto-maintain",
     "description": "Label for auto-maintain checkbox"
-  },
-  "autoMaintainDesc": {
-    "message": "Automatically remove the oldest round when a new one is added",
-    "description": "Description for auto-maintain feature"
   },
   "autoMaintainEnabled": {
     "message": "Auto-maintain enabled (keeping $ROUNDS$ rounds)",

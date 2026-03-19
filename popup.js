@@ -25,15 +25,16 @@ function initI18n() {
 // 页面加载时初始化 i18n
 initI18n();
 
-// 显示状态消息
-function showStatus(message, type = 'info') {
+// 显示状态消息；persistent=true 时不自动消失（用于严重警告）
+function showStatus(message, type = 'info', persistent = false) {
   const statusEl = document.getElementById('status');
   statusEl.textContent = message;
   statusEl.className = `status show ${type}`;
-  
-  setTimeout(() => {
-    statusEl.classList.remove('show');
-  }, 5000);
+  if (!persistent) {
+    setTimeout(() => {
+      statusEl.classList.remove('show');
+    }, 5000);
+  }
 }
 
 // 获取当前活动标签页
@@ -84,13 +85,17 @@ async function notifyAutoMaintainChange() {
 // 页面加载时恢复设置
 loadSettings();
 
-// 从 badge 读取当前轮数并显示在 popup 内
+// 从 badge 读取当前轮数并显示在 popup 内；若 badge 为 ! 则直接显示持久警告
 async function loadCurrentRounds() {
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     if (!tab) return;
     const text = await chrome.action.getBadgeText({ tabId: tab.id });
-    setCurrentRoundsDisplay(text);
+    if (text === '!') {
+      showStatus(getMessage('domWarningMessage'), 'error', true);
+    } else {
+      setCurrentRoundsDisplay(text);
+    }
   } catch (e) {
     // 非 ChatGPT 页面或 badge 为空时忽略
   }
@@ -207,7 +212,7 @@ chrome.runtime.onMessage.addListener((message) => {
   if (message.action === 'domWarning') {
     getCurrentTab().then(tab => {
       if (tab?.id === message.tabId) {
-        showStatus(getMessage('domWarningMessage'), 'error');
+        showStatus(getMessage('domWarningMessage'), 'error', true);
       }
     }).catch(() => {});
   }

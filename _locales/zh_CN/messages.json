@@ -19,17 +19,9 @@
     "message": "轮",
     "description": "轮数单位"
   },
-  "description": {
-    "message": "清理历史对话轮次，只保留最近 N 轮，提升页面性能",
-    "description": "描述文本"
-  },
   "cleanButton": {
     "message": "🧹 清理历史对话",
     "description": "清理历史按钮文本"
-  },
-  "checkButton": {
-    "message": "📊 查看当前对话数",
-    "description": "查看对话数按钮文本"
   },
   "errorKeepRoundsRange": {
     "message": "保留轮数必须在 1-100 之间",
@@ -65,20 +57,6 @@
     "message": "发生错误：",
     "description": "错误前缀消息"
   },
-  "infoCurrentRounds": {
-    "message": "当前共有 $ROUNDS$ 轮对话",
-    "description": "显示当前轮数的信息消息",
-    "placeholders": {
-      "ROUNDS": {
-        "content": "$1",
-        "example": "10"
-      }
-    }
-  },
-  "errorCannotGetRounds": {
-    "message": "无法获取对话数",
-    "description": "无法获取轮数时的错误消息"
-  },
   "errorNotFound": {
     "message": "未找到对话消息，请确保在 ChatGPT 对话页面",
     "description": "未找到消息时的错误消息"
@@ -111,47 +89,9 @@
     "message": "清理失败：",
     "description": "清理失败的错误前缀"
   },
-  "errorNoMessages": {
-    "message": "未找到对话消息",
-    "description": "未找到消息时的错误消息"
-  },
-  "infoCurrentRoundsDetailed": {
-    "message": "当前共有 $ROUNDS$ 轮对话（$ARTICLES$ 个 article）",
-    "description": "显示详细轮数信息",
-    "placeholders": {
-      "ROUNDS": {
-        "content": "$1",
-        "example": "10"
-      },
-      "ARTICLES": {
-        "content": "$2",
-        "example": "20"
-      }
-    }
-  },
-  "errorCheckFailed": {
-    "message": "检查失败：",
-    "description": "检查失败的错误前缀"
-  },
-  "installed": {
-    "message": "ChatGPT History Cleaner 已安装",
-    "description": "扩展安装时的消息"
-  },
-  "updated": {
-    "message": "ChatGPT History Cleaner 已更新",
-    "description": "扩展更新时的消息"
-  },
-  "detectedChatGPT": {
-    "message": "检测到 ChatGPT 页面",
-    "description": "检测到 ChatGPT 页面时的消息"
-  },
   "autoMaintainLabel": {
     "message": "自动保持",
     "description": "自动保持复选框标签"
-  },
-  "autoMaintainDesc": {
-    "message": "产生新对话时，自动删除最旧的一轮",
-    "description": "自动保持功能描述"
   },
   "autoMaintainEnabled": {
     "message": "已开启自动保持（保留 $ROUNDS$ 轮）",
