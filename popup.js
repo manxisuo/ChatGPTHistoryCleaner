@@ -84,6 +84,29 @@ async function notifyAutoMaintainChange() {
 // 页面加载时恢复设置
 loadSettings();
 
+// 从 badge 读取当前轮数并显示在 popup 内
+async function loadCurrentRounds() {
+  try {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (!tab) return;
+    const text = await chrome.action.getBadgeText({ tabId: tab.id });
+    setCurrentRoundsDisplay(text);
+  } catch (e) {
+    // 非 ChatGPT 页面或 badge 为空时忽略
+  }
+}
+
+function setCurrentRoundsDisplay(text) {
+  const el = document.getElementById('currentRounds');
+  if (!el) return;
+  if (text) {
+    el.textContent = text + ' ' + chrome.i18n.getMessage('roundsUnit');
+  } else {
+    el.textContent = '';
+  }
+}
+loadCurrentRounds();
+
 // 输入框改变时保存并通知
 document.getElementById('keepRounds').addEventListener('change', async () => {
   if (await saveSettings()) {
@@ -171,43 +194,13 @@ document.getElementById('removeOldRounds').addEventListener('click', async () =>
   }
 });
 
-// 查看当前对话数
-document.getElementById('checkRounds').addEventListener('click', async () => {
-  try {
-    const tab = await getCurrentTab();
-    
-    if (!tab.url.includes('chat.openai.com') && !tab.url.includes('chatgpt.com')) {
-      showStatus(getMessage('errorNotChatGPT'), 'error');
-      return;
+// 监听 background 广播的 badge 更新，与图标 badge 保持同步
+chrome.runtime.onMessage.addListener((message) => {
+  if (message.action !== 'badgeUpdated') return;
+  getCurrentTab().then(tab => {
+    if (tab?.id === message.tabId) {
+      setCurrentRoundsDisplay(message.rounds > 0 ? String(message.rounds) : '');
     }
-
-    // 检查 content script 是否已加载
-    const scriptReady = await checkContentScript(tab.id);
-    if (!scriptReady) {
-      showStatus(getMessage('errorScriptLoad') + ' Please refresh the ChatGPT page and try again.', 'error');
-      return;
-    }
-
-    chrome.tabs.sendMessage(tab.id, { 
-      action: 'checkRounds'
-    }, (response) => {
-      if (chrome.runtime.lastError) {
-        showStatus(getMessage('errorOperationFailed'), 'error');
-        console.error('发送消息失败:', chrome.runtime.lastError);
-        return;
-      }
-      if (response) {
-        if (response.success) {
-          showStatus(getMessage('infoCurrentRounds', [response.rounds.toString()]), 'info');
-        } else {
-          showStatus(response.message || getMessage('errorCannotGetRounds'), 'error');
-        }
-      } else {
-        showStatus(getMessage('errorCannotGetRounds'), 'error');
-      }
-    });
-  } catch (error) {
-    showStatus(getMessage('errorOccurred') + error.message, 'error');
-    console.error('查看对话数错误:', error);
-  }
+  }).catch(() => {});
 });
+

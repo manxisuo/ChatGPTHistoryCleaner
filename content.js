@@ -6,6 +6,11 @@ function getMessage(key, substitutions = []) {
   return chrome.i18n.getMessage(key, substitutions);
 }
 
+// 向 background 发送当前轮数，更新图标 badge
+function updateBadge(rounds) {
+  chrome.runtime.sendMessage({ action: 'updateBadge', rounds });
+}
+
 // 查找所有对话节点（兼容旧版 article 和新版 section turn）
 function findTurnElements() {
   const thread = document.querySelector('#thread');
@@ -77,36 +82,6 @@ function removeOldRounds(keepRounds) {
     return {
       success: false,
       message: getMessage('errorCleanFailed') + error.message
-    };
-  }
-}
-
-// 检查当前对话轮数
-function checkRounds() {
-  try {
-    const turnElements = findTurnElements();
-
-    if (turnElements.length === 0) {
-      return {
-        success: false,
-        message: getMessage('errorNoMessages'),
-        rounds: 0
-      };
-    }
-
-    const rounds = Math.floor(turnElements.length / 2);
-
-    return {
-      success: true,
-      message: getMessage('infoCurrentRoundsDetailed', [rounds.toString(), turnElements.length.toString()]),
-      rounds: rounds
-    };
-  } catch (error) {
-    console.error('检查对话轮数时出错:', error);
-    return {
-      success: false,
-      message: getMessage('errorCheckFailed') + error.message,
-      rounds: 0
     };
   }
 }
@@ -189,11 +164,62 @@ function updateAutoMaintain(enabled, keepRounds) {
   }
 }
 
+// ========== Badge 专用持续观察者 ==========
+// 与 autoMaintain 无关，始终运行，实时反映当前轮数
+
+let badgeTimer = null;
+
+function scheduleBadgeUpdate() {
+  if (badgeTimer) clearTimeout(badgeTimer);
+  badgeTimer = setTimeout(() => {
+    const turns = findTurnElements();
+    updateBadge(Math.floor(turns.length / 2));
+  }, 300);
+}
+
+function isTurnRelatedNode(node) {
+  if (node.nodeType !== Node.ELEMENT_NODE) return false;
+  const isTurnSection =
+    node.matches?.('section[data-testid^="conversation-turn-"][data-turn-id]') ||
+    node.querySelector?.('section[data-testid^="conversation-turn-"][data-turn-id]');
+  return (
+    node.id === 'thread' ||
+    node.tagName === 'ARTICLE' ||
+    node.querySelector?.('#thread') ||
+    node.querySelector?.('article') ||
+    isTurnSection
+  );
+}
+
+let badgeObserver = null;
+
+function startBadgeObserver() {
+  if (badgeObserver) return;
+  const target = document.documentElement || document.body;
+  if (!target) return;
+
+  badgeObserver = new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+      const nodes = [...mutation.addedNodes, ...mutation.removedNodes];
+      for (const node of nodes) {
+        if (isTurnRelatedNode(node)) {
+          scheduleBadgeUpdate();
+          return;
+        }
+      }
+    }
+  });
+
+  badgeObserver.observe(target, { childList: true, subtree: true });
+}
+
 // 页面加载时从存储中恢复自动保持设置
 async function initAutoMaintain() {
   try {
     const result = await chrome.storage.local.get({ autoMaintain: false, keepRounds: 10 });
     updateAutoMaintain(result.autoMaintain, result.keepRounds);
+    startBadgeObserver();
+    scheduleBadgeUpdate(); // 尝试立即更新（若 turns 已渲染）
   } catch (e) {
     // storage 访问失败时忽略
   }
@@ -233,9 +259,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   try {
     if (request.action === 'removeOldRounds') {
       const result = removeOldRounds(request.keepRounds);
-      sendResponse(result);
-    } else if (request.action === 'checkRounds') {
-      const result = checkRounds();
       sendResponse(result);
     }
   } catch (error) {

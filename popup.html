@@ -8,12 +8,15 @@
 </head>
 <body>
   <div class="container">
-    <h1 data-i18n="title">ChatGPT History Cleaner</h1>
+    <div class="header">
+      <h1 data-i18n="title">ChatGPT History Cleaner</h1>
+      <span id="currentRounds" class="current-rounds-badge"></span>
+    </div>
     <div class="settings-section">
-      <label for="keepRounds" data-i18n="keepRoundsLabel">保留最近对话轮数：</label>
-      <div class="input-group">
+      <div class="rounds-row">
+        <label for="keepRounds" data-i18n="keepRoundsLabel">保留最近：</label>
         <input type="number" id="keepRounds" min="1" max="100" value="10" />
-        <span class="input-hint" data-i18n="roundsUnit">轮（1-100）</span>
+        <span class="input-hint" data-i18n="roundsUnit">轮</span>
       </div>
       <div class="checkbox-group">
         <label class="checkbox-label">
@@ -26,13 +29,9 @@
       <button id="removeOldRounds" class="btn btn-primary" data-i18n="cleanButton">
         🧹 清理历史对话
       </button>
-      <button id="checkRounds" class="btn btn-info" data-i18n="checkButton">
-        📊 查看当前对话数
-      </button>
     </div>
     <div id="status" class="status"></div>
   </div>
   <script src="popup.js"></script>
 </body>
 </html>
-

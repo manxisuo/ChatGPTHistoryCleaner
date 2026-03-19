@@ -12,11 +12,11 @@
     "description": "Popup title"
   },
   "keepRoundsLabel": {
-    "message": "Keep recent rounds:",
+    "message": "Keep recent:",
     "description": "Label for keep rounds input"
   },
   "roundsUnit": {
-    "message": "rounds (1-100)",
+    "message": "rounds",
     "description": "Unit for rounds input"
   },
   "description": {
@@ -166,6 +166,16 @@
   "autoMaintainDisabled": {
     "message": "Auto-maintain disabled",
     "description": "Status message when auto-maintain is disabled"
+  },
+  "badgeTitle": {
+    "message": "Current conversation: $ROUNDS$ rounds",
+    "description": "Tooltip for the extension icon badge",
+    "placeholders": {
+      "ROUNDS": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
   }
 }
 

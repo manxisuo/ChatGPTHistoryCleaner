@@ -12,11 +12,11 @@
     "description": "弹窗标题"
   },
   "keepRoundsLabel": {
-    "message": "保留最近对话轮数：",
+    "message": "保留最近：",
     "description": "保留轮数输入框标签"
   },
   "roundsUnit": {
-    "message": "轮（1-100）",
+    "message": "轮",
     "description": "轮数单位"
   },
   "description": {
@@ -166,6 +166,16 @@
   "autoMaintainDisabled": {
     "message": "已关闭自动保持",
     "description": "自动保持关闭时的状态消息"
+  },
+  "badgeTitle": {
+    "message": "当前对话：$ROUNDS$ 轮",
+    "description": "图标 badge 的悬浮提示",
+    "placeholders": {
+      "ROUNDS": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
   }
 }
 
