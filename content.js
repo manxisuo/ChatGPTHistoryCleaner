@@ -168,12 +168,58 @@ function updateAutoMaintain(enabled, keepRounds) {
 // 与 autoMaintain 无关，始终运行，实时反映当前轮数
 
 let badgeTimer = null;
+let domCheckTimer = null;
+
+// 采集 #thread 内部结构样本，用于诊断 DOM 变更
+function runDOMDiagnostic() {
+  const thread = document.querySelector('#thread');
+  if (!thread) return;
+
+  // 只有消息真正渲染后才会出现 data-message-author-role 或 data-turn-id。
+  // 若两者都不存在，说明页面仍在加载中，不触发警告（避免长对话慢加载导致误报）。
+  const hasMessageContent =
+    thread.querySelector('[data-message-author-role]') ||
+    thread.querySelector('[data-turn-id]');
+  if (!hasMessageContent) return;
+
+  const sample = [...thread.querySelectorAll('[data-testid]')]
+    .slice(0, 5)
+    .map(el => `${el.tagName.toLowerCase()}[data-testid="${el.dataset.testid}"]`)
+    .join(' | ') || '(no data-testid elements found)';
+
+  console.error(`[ChatGPT History Cleaner] DOM structure may have changed.\nSample: ${sample}`);
+  chrome.runtime.sendMessage({ action: 'domWarning', sample });
+}
+
+function scheduleDOMCheck() {
+  if (domCheckTimer) return; // 已有待执行的检查，不重复
+  domCheckTimer = setTimeout(() => {
+    domCheckTimer = null;
+    if (findTurnElements().length > 0) return;        // turns 已出现，无需诊断
+    if (!location.pathname.includes('/c/')) return;   // 不在对话页
+    runDOMDiagnostic();
+  }, 10000); // 等待 10 秒，确保页面已充分渲染
+}
+
+function cancelDOMCheck() {
+  if (domCheckTimer) {
+    clearTimeout(domCheckTimer);
+    domCheckTimer = null;
+  }
+}
 
 function scheduleBadgeUpdate() {
   if (badgeTimer) clearTimeout(badgeTimer);
   badgeTimer = setTimeout(() => {
     const turns = findTurnElements();
-    updateBadge(Math.floor(turns.length / 2));
+    const count = Math.floor(turns.length / 2);
+    updateBadge(count);
+    // turns 存在 → 结构正常，取消待检查；turns 为 0 且在对话页 → 启动延迟检查
+    if (count > 0) {
+      cancelDOMCheck();
+    } else if (location.pathname.includes('/c/')) {
+      scheduleDOMCheck();
+    }
   }, 300);
 }
 
@@ -245,6 +291,16 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   // 处理 ping 消息（用于检查 content script 是否已加载）
   if (request.action === 'ping') {
     sendResponse({ success: true, message: 'content script loaded' });
+    return true;
+  }
+
+  // 测试用：直接触发 DOM 警告（跳过所有条件判断）
+  if (request.action === 'testDOMWarning') {
+    chrome.runtime.sendMessage({
+      action: 'domWarning',
+      sample: '[TEST] section[data-testid="conversation-turn-1"] | div[data-message-author-role="user"]'
+    });
+    sendResponse({ success: true });
     return true;
   }
   

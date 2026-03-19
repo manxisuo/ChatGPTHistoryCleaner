@@ -194,13 +194,22 @@ document.getElementById('removeOldRounds').addEventListener('click', async () =>
   }
 });
 
-// 监听 background 广播的 badge 更新，与图标 badge 保持同步
+// 监听 background 广播的消息
 chrome.runtime.onMessage.addListener((message) => {
-  if (message.action !== 'badgeUpdated') return;
-  getCurrentTab().then(tab => {
-    if (tab?.id === message.tabId) {
-      setCurrentRoundsDisplay(message.rounds > 0 ? String(message.rounds) : '');
-    }
-  }).catch(() => {});
+  if (message.action === 'badgeUpdated') {
+    getCurrentTab().then(tab => {
+      if (tab?.id === message.tabId) {
+        setCurrentRoundsDisplay(message.rounds > 0 ? String(message.rounds) : '');
+      }
+    }).catch(() => {});
+  }
+
+  if (message.action === 'domWarning') {
+    getCurrentTab().then(tab => {
+      if (tab?.id === message.tabId) {
+        showStatus(getMessage('domWarningMessage'), 'error');
+      }
+    }).catch(() => {});
+  }
 });
 

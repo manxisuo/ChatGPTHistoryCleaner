@@ -60,6 +60,22 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true;
   }
 
+  if (request.action === 'domWarning') {
+    const tabId = sender.tab?.id;
+    if (tabId != null) {
+      chrome.action.setBadgeText({ text: '!', tabId });
+      chrome.action.setBadgeBackgroundColor({ color: '#f59e0b', tabId });
+      chrome.action.setTitle({
+        title: chrome.i18n.getMessage('domWarningTitle'),
+        tabId
+      });
+    }
+    // 通知 popup（若已打开）
+    chrome.runtime.sendMessage({ action: 'domWarning', tabId }).catch(() => {});
+    sendResponse({ success: true });
+    return true;
+  }
+
   if (request.action === 'getStorage') {
     chrome.storage.local.get(request.keys, (result) => {
       sendResponse(result);

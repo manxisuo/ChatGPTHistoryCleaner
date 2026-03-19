@@ -167,6 +167,14 @@
     "message": "Auto-maintain disabled",
     "description": "Status message when auto-maintain is disabled"
   },
+  "domWarningTitle": {
+    "message": "ChatGPT page structure may have changed — extension cannot detect conversations",
+    "description": "Icon tooltip when DOM structure change is detected"
+  },
+  "domWarningMessage": {
+    "message": "⚠ ChatGPT page structure may have changed. Extension is temporarily unable to work. Please contact the developer.",
+    "description": "Warning shown in popup when DOM structure change is detected"
+  },
   "badgeTitle": {
     "message": "Current conversation: $ROUNDS$ rounds",
     "description": "Tooltip for the extension icon badge",
