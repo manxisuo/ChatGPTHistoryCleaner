@@ -6,7 +6,12 @@
   "default_locale": "en",
   "permissions": [
     "activeTab",
-    "storage"
+    "storage",
+    "tabs"
+  ],
+  "host_permissions": [
+    "https://chat.openai.com/*",
+    "https://chatgpt.com/*"
   ],
   "action": {
     "default_popup": "popup.html",
@@ -22,7 +27,7 @@
         "https://chat.openai.com/*",
         "https://chatgpt.com/*"
       ],
-      "js": ["content.js"],
+      "js": ["safari-api.js", "content.js"],
       "run_at": "document_idle"
     }
   ],
@@ -35,4 +40,3 @@
     "128": "icons/icon128.png"
   }
 }
-
