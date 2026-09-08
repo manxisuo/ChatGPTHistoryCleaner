@@ -64,6 +64,11 @@ All behavior runs locally in the browser page. The extension does not store conv
 3. Click Load unpacked
 4. Select this project folder
 
+### Safari on macOS
+
+Safari support is available through Apple's Safari Web Extension converter.
+See [SAFARI.md](SAFARI.md) for generating and running the Xcode project.
+
 ## Usage
 
 1. Open a ChatGPT conversation on `chatgpt.com` or `chat.openai.com`
